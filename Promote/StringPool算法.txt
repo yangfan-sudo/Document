@@ -1,0 +1,162 @@
+﻿
+using System.Collections.Generic;
+using UnityEngine.UI;
+
+public class StringPool
+{
+    public static int GetIntLength(uint value)
+    {
+        int count = 1;
+        
+        value = value / 10;
+        while (value >= 10)
+        {
+            count++;
+            value = value / 10;
+        }
+
+        if (value > 0)
+            count++;
+        return count;
+
+    }
+    private static char[] s_charIndex = new char[10] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+    private static char nullchar = '\0';
+    private static char pluassing = '+';
+    public static void ChangeStringContent(string strDest, uint number, bool withplus = false)
+    {
+        if (strDest == null)
+            return;
+
+        int length = 0;
+
+        if (!withplus)
+        {
+            length = GetIntLength(number);
+        }
+        else
+        {
+            length = GetIntLength(number) + 1;
+        }
+        unsafe
+        {
+            fixed (char* aTemp = strDest)
+            {
+                for (int i = strDest.Length-1; i >= 0; --i)
+                {
+                    if (length - 1 >= i)
+                    {
+                        *(aTemp + i) = s_charIndex[number % 10];
+                        number = number / 10;
+                    }
+                    else
+                    {
+                        *(aTemp + i) = nullchar;
+                    }
+                }
+                if (withplus)
+                {
+                    *aTemp = pluassing;
+                }
+            }
+        }
+    }
+    private static int maxhitStringNum = 10;
+    private static int maxhitNumDigit = 8;
+
+    public static void SetMaxHitStringNum(int num)
+    {
+        maxhitStringNum = num;
+    }
+    public static void SetMaxhitNumDigit(int num)
+    {
+        maxhitNumDigit = num;
+    }
+    private static Stack<string> stackString = new Stack<string>(16);
+    public static string GetString()
+    {
+        if (stackString.Count > 0)
+        {
+            return stackString.Pop();
+        }
+
+        return new string('\0', maxhitNumDigit);
+
+    }
+
+    public static void BackToStringPool(string tmpstr)
+    {
+        if (stackString.Count < maxhitStringNum && tmpstr.Length == maxhitNumDigit)
+        {
+            stackString.Push(tmpstr);
+        }
+    }
+
+}
+public class CombNumberStringPool
+{
+    private static readonly char[] NumChars = new char[10] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+    private static readonly char[] LetterChars = new char[10] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j' };
+    private static readonly char nullchar = '\0';
+  //  private static readonly char spchar1 = 'x';
+   // private static readonly char spchar2 = 'y';
+    private static int GetIntLength(uint value)
+    {
+        int count = 1;
+
+        value = value / 10;
+        while (value >= 10)
+        {
+            count++;
+            value = value / 10;
+        }
+
+        if (value > 0)
+            count++;
+        return count;
+
+    }
+    public static void SetStringContent(ref string strDest, uint number,int maxLength, bool isNum)
+    {
+
+        int length = GetIntLength(number);
+        
+        if (string.IsNullOrEmpty(strDest) || strDest.Length< length+1)
+        {
+            strDest = new string(nullchar, maxLength);
+        }
+        char[] charArr = isNum ? NumChars:LetterChars;
+        unsafe
+        {
+            fixed (char* aTemp = strDest)
+            {
+                for (int i = strDest.Length - 1; i >= 0; --i)
+                {
+                    if (length >i)
+                    {
+                        *(aTemp + i) = charArr[number % 10];
+                        number = number / 10;
+                    }
+                    //else if (length == i)
+                    //{
+                    //    if (isNum)
+                    //    {
+                    //        *(aTemp + i) = spchar1;
+                    //    }
+                    //    else
+                    //    {
+                    //        *(aTemp + i) = spchar2;
+                    //    }
+                    //}
+                    else
+                    {
+                        *(aTemp + i) = nullchar;
+                    }
+                }
+               
+            }
+        }
+    }
+}
+
+
